@@ -30,6 +30,11 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/{userId}")
+    public UserData getUserById(@PathVariable Long userId) {
+        return userService.getUserById(userId);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserData createUser(@RequestBody UserData userData) throws UnsupportedEncodingException {

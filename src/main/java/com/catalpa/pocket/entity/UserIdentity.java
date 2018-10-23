@@ -35,8 +35,8 @@ public class UserIdentity extends BaseEntity {
     private Long id;
     @TableField("user_id")
     private Long userId;
-    @TableField("client_id")
-    private String clientId;
+    @TableField("platform_id")
+    private String platformId;
     @TableField("third_party_id")
     private String thirdPartyId;
 

@@ -4,13 +4,13 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.catalpa.pocket.entity.UserIdentity">
-        <id column="id" property="id" />
-    <result column="del_flg" property="delFlg" />
-    <result column="created_date" property="createdDate" />
-    <result column="updated_date" property="updatedDate" />
-        <result column="user_id" property="userId" />
-        <result column="client_id" property="clientId" />
-        <result column="third_party_id" property="thirdPartyId" />
+        <id column="id" property="id"/>
+        <result column="del_flg" property="delFlg"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="updated_date" property="updatedDate"/>
+        <result column="user_id" property="userId"/>
+        <result column="platform_id" property="platform"/>
+        <result column="third_party_id" property="thirdPartyId"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -18,7 +18,7 @@
         del_flg,
         created_date,
         updated_date,
-        id, user_id, client_id, third_party_id
+        id, user_id, platform_id, third_party_id
     </sql>
 
 </mapper>

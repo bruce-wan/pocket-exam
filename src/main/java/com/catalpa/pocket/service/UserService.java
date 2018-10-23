@@ -9,5 +9,7 @@ import java.io.UnsupportedEncodingException;
  */
 public interface UserService {
 
-    UserData createUser(UserData userData) throws UnsupportedEncodingException;
+    UserData createUser(UserData userData);
+
+    UserData getUserById(Long userId);
 }
