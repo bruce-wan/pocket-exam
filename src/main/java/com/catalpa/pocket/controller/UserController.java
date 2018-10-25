@@ -11,12 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.UnsupportedEncodingException;
 
 /**
- * <p>
- *  前端控制器
- * </p>
- *
- * @author ${author}
- * @since 2018-10-23
+ * Created by wanchuan01 on 2018/10/23.
  */
 @Log4j2
 @RestController
