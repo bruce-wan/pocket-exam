@@ -1,6 +1,7 @@
 package com.catalpa.pocket.controller;
 
 
+import com.catalpa.pocket.entity.Platform;
 import com.catalpa.pocket.model.UserData;
 import com.catalpa.pocket.service.UserService;
 import lombok.extern.log4j.Log4j2;
@@ -32,8 +33,8 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserData createUser(@RequestBody UserData userData) throws UnsupportedEncodingException {
-        return userService.createUser(userData);
+    public UserData createUser(@RequestAttribute Platform platform, @RequestBody UserData userData) throws UnsupportedEncodingException {
+        return userService.createUser(platform.getPlatformId(), userData);
     }
 }
 

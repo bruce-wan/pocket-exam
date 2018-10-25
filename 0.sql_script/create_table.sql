@@ -26,7 +26,7 @@ CREATE TABLE `t_user_identity` (
   `id`             bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT
   COMMENT '主键ID',
   `user_id`        bigint(20) UNSIGNED NOT NULL,
-  `platform_id`    char(16)            NOT NULL,
+  `platform_id`    char(18)            NOT NULL,
   `third_party_id` varchar(50)         NOT NULL,
   `del_flg`        tinyint(2)          NOT NULL DEFAULT 0,
   `created_date`   timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -144,5 +144,6 @@ CREATE TABLE `t_platform` (
   ENGINE = InnoDB
   DEFAULT CHARACTER SET = utf8mb4;
 
-INSERT INTO `t_platform` (`platform_id`, `platform_secret`, `platform_scope`, `platform_name`, `grant_type`) VALUES ('PB5K6oEjLy8wp9Ucnv', 'eSu3wkIq0NLwrmtTUD0TZBMaKtK0WfOh', 'all', 'miniprogram', 'client_credentials,authorization_code,refresh_token');
-INSERT INTO `t_platform` (`platform_id`, `platform_secret`, `platform_scope`, `platform_name`, `grant_type`) VALUES ('fl8szmltwlqv32bnvs', '0v2xne0mvl2962tl9vgudh7ohsz5q3tu', 'all', 'publicaccount', 'client_credentials,authorization_code,refresh_token');
+INSERT INTO `t_platform` (`platform_id`, `platform_secret`, `platform_scope`, `platform_name`, `grant_type`) VALUES ('PB5K6oEjLy8wp9Ucnv', 'eSu3wkIq0NLwrmtTUD0TZBMaKtK0WfOh', 'all', 'wechat', 'client_credentials,authorization_code,refresh_token');
+INSERT INTO `t_platform` (`platform_id`, `platform_secret`, `platform_scope`, `platform_name`, `grant_type`) VALUES ('fl8szmltwlqv32bnvs', '0v2xne0mvl2962tl9vgudh7ohsz5q3tu', 'all', 'baidu', 'client_credentials,authorization_code,refresh_token');
+INSERT INTO `t_platform` (`platform_id`, `platform_secret`, `platform_scope`, `platform_name`, `grant_type`) VALUES ('DlMAvNaNj4PPwI2e', 'kUlv3x99rKjVbgI5lK7nLc9P66Qse0ws', 'all', 'webpage', 'client_credentials');

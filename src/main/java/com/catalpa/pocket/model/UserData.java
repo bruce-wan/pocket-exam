@@ -15,7 +15,7 @@ import java.util.List;
 public class UserData {
     private Long id;
     private String username;
-    private String password;
+    private String password = "123456";
     private String nickName;
     private Integer gender;
     private Integer sex;
