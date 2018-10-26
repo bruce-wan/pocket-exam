@@ -12,7 +12,7 @@ public interface UserService {
 
     UserData getUserById(Long userId);
 
-    UserData getUserByUnionId(String unionid);
+    UserData getUserByThirdPartyId(String platformId, String thirdPartyId);
 
     UserIdentity addUserIdentity(Long id, String openid, String platformId);
 }

@@ -1,7 +1,6 @@
 package com.catalpa.pocket.service.impl;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
-import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.catalpa.pocket.config.ShiroProperties;
 import com.catalpa.pocket.entity.UserIdentity;
 import com.catalpa.pocket.entity.UserInfo;
@@ -21,7 +20,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,8 +69,8 @@ public class UserServiceImpl implements UserService {
         }
 
         String salt = RandomUtil.generateString(false, true, true, null, 10);
-        SimpleHash simpleHash = new SimpleHash(shiroProperties.getHashAlgorithmName(), userData.getPassword(), ByteSource.Util.bytes(username + salt), shiroProperties.getHashIterations());
-
+        String password = StringUtils.isNotBlank(userData.getPassword()) ? userData.getPassword() : "123456";
+        SimpleHash simpleHash = new SimpleHash(shiroProperties.getHashAlgorithmName(), password, ByteSource.Util.bytes(username + salt), shiroProperties.getHashIterations());
 
         userInfo.setPassword(simpleHash.toString());
         userInfo.setNickName(userData.getNickName());
@@ -88,6 +86,7 @@ public class UserServiceImpl implements UserService {
         }
 
         Long userId = userInfo.getId();
+        userData.setId(userId);
         if (log.isDebugEnabled()) {
             log.debug("new user id: ====>" + userId);
         }
@@ -123,6 +122,7 @@ public class UserServiceImpl implements UserService {
 
             userData.setId(userId);
             userData.setUsername(userInfo.getUsername());
+            userData.setNickName(userInfo.getNickName());
             userData.setGender(userInfo.getGender());
             userData.setHeadImgUrl(userInfo.getHeadImgUrl());
 
@@ -144,8 +144,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserData getUserByUnionId(String unionid) {
-        return null;
+    public UserData getUserByThirdPartyId(String platformId, String thirdPartyId) {
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setPlatformId(platformId);
+        userIdentity.setThirdPartyId(thirdPartyId);
+        EntityWrapper<UserIdentity> wrapper = new EntityWrapper<>(userIdentity);
+        List<UserIdentity> identities = userIdentityMapper.selectList(wrapper);
+
+        if (identities != null && !identities.isEmpty()) {
+            if (identities.size() > 1) {
+                String message = "invalid user identity with platform is " + platformId + " and thirdPartyId is " + thirdPartyId;
+                log.error(message);
+                throw new ApplicationException("500", "50003", message);
+            } else {
+                UserIdentity identity = identities.get(0);
+                return this.getUserById(identity.getUserId());
+            }
+        } else {
+            return null;
+        }
     }
 
     @Override

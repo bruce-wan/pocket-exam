@@ -25,7 +25,7 @@ public class SocialController {
         this.socialService = socialService;
     }
 
-    @PostMapping
+    @PostMapping("/login")
     public LoginResponse login(@RequestAttribute Platform platform, @RequestBody LoginRequest loginRequest) {
         if (log.isDebugEnabled()) {
             log.debug("platform: ====> "+ platform);

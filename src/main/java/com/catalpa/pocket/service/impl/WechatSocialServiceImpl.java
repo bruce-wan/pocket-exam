@@ -86,11 +86,11 @@ public class WechatSocialServiceImpl implements SocialService, WechatService {
     }
 
     private UserData getUserData(String platformId, String code, String encryptedData, String iv) {
-//        JSONObject sessionKeyJson = getSessionKey(code);
-        JSONObject sessionKeyJson = new JSONObject();
-        sessionKeyJson.put("openid", "o4j8X0Q-LTnxp0o_y1ops0pwaWsM");
-        sessionKeyJson.put("unionid", "od63W05TovzFY9Xwtm-ebOQ2WhcY");
-        sessionKeyJson.put("session_key", "session_key");
+        JSONObject sessionKeyJson = getSessionKey(code);
+//        JSONObject sessionKeyJson = new JSONObject();
+//        sessionKeyJson.put("openid", "o4j8X0Q-LTnxp0o_y1ops0pwaWsM");
+//        sessionKeyJson.put("unionid", "od63W05TovzFY9Xwtm-ebOQ2WhcY");
+//        sessionKeyJson.put("session_key", "session_key");
 
         if (log.isDebugEnabled()) {
             log.debug("input encryptedData:" + encryptedData + " and iv: " + iv);
@@ -100,12 +100,12 @@ public class WechatSocialServiceImpl implements SocialService, WechatService {
         String sessionKey = sessionKeyJson.getString("session_key");
         String unionid = sessionKeyJson.getString("unionid");
 
-        UserData userData = userService.getUserByUnionId(unionid);
+        UserData userData = userService.getUserByThirdPartyId(platformId, StringUtils.isNotBlank(unionid) ? unionid : openid);
         if (userData == null) {
             if (StringUtils.isNotBlank(encryptedData) && StringUtils.isNotBlank(iv)) {
 //                String skey = CryptoUtil.getHashSHA1Str(sessionKey, "utf8");
-//                String decrypt = CryptoUtil.aesCbcDecrypt(encryptedData, sessionKey, iv);
-                String decrypt = "{\"openId\":\"o4j8X0Q-LTnxp0o_y1ops0pwaWsM\",\"nickName\":\"( *¯ ꒳¯*)ok!!\",\"gender\":1,\"language\":\"zh_CN\",\"city\":\"\",\"province\":\"\",\"country\":\"Albania\",\"avatarUrl\":\"https://wx.qlogo.cn/mmopen/vi_32/DYAIOgq83eqQ4Qib7yhHB8zNwvibuIchefLAXyLjTj9vb2lRWWUwONrDYMIAxlpRoibzq21eUcicMUJqoxZNNXVtvA/132\",\"unionId\":\"od63W05TovzFY9Xwtm-ebOQ2WhcY\",\"watermark\":{\"timestamp\":1531215296,\"appid\":\"wx65041ea5429cf1ec\"}}";
+                String decrypt = CryptoUtil.aesCbcDecrypt(encryptedData, sessionKey, iv);
+//                String decrypt = "{\"openId\":\"o4j8X0Q-LTnxp0o_y1ops0pwaWsM\",\"nickName\":\"( *¯ ꒳¯*)ok!!\",\"gender\":1,\"language\":\"zh_CN\",\"city\":\"\",\"province\":\"\",\"country\":\"Albania\",\"avatarUrl\":\"https://wx.qlogo.cn/mmopen/vi_32/DYAIOgq83eqQ4Qib7yhHB8zNwvibuIchefLAXyLjTj9vb2lRWWUwONrDYMIAxlpRoibzq21eUcicMUJqoxZNNXVtvA/132\",\"unionId\":\"od63W05TovzFY9Xwtm-ebOQ2WhcY\",\"watermark\":{\"timestamp\":1531215296,\"appid\":\"wx65041ea5429cf1ec\"}}";
                 log.info(decrypt);
                 userData = JSONObject.parseObject(decrypt, UserData.class);
                 userService.createUser(platformId, userData);
