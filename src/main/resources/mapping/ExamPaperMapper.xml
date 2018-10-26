@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catalpa.pocket.mapper.ExamPaperMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.catalpa.pocket.entity.ExamPaper">
+        <id column="id" property="id" />
+    <result column="del_flg" property="delFlg" />
+    <result column="created_date" property="createdDate" />
+    <result column="updated_date" property="updatedDate" />
+        <result column="name" property="name" />
+        <result column="catalog" property="catalog" />
+        <result column="level" property="level" />
+        <result column="status" property="status" />
+        <result column="total_score" property="totalScore" />
+        <result column="pass_score" property="passScore" />
+        <result column="question_order" property="questionOrder" />
+        <result column="papertype" property="papertype" />
+        <result column="content" property="content" />
+        <result column="remark" property="remark" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        del_flg,
+        created_date,
+        updated_date,
+        id, name, catalog, level, status, total_score, pass_score, question_order, papertype, content, remark
+    </sql>
+
+</mapper>

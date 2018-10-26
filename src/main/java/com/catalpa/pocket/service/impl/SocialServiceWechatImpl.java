@@ -29,7 +29,7 @@ import java.util.List;
 @Log4j2
 @Service("wechatSocialService")
 @EnableConfigurationProperties(value = {WechatProperties.class})
-public class WechatSocialServiceImpl implements SocialService, WechatService {
+public class SocialServiceWechatImpl implements SocialService, WechatService {
 
     private final WechatProperties wechatProperties;
     private final RestTemplate restTemplate;
@@ -37,7 +37,7 @@ public class WechatSocialServiceImpl implements SocialService, WechatService {
     private final UserService userService;
 
     @Autowired
-    public WechatSocialServiceImpl(@Qualifier("tokenHandlerDispatcher") TokenHandler tokenHandler, WechatProperties wechatProperties, RestTemplate restTemplate, UserService userService) {
+    public SocialServiceWechatImpl(@Qualifier("tokenHandlerDispatcher") TokenHandler tokenHandler, WechatProperties wechatProperties, RestTemplate restTemplate, UserService userService) {
         this.tokenHandler = tokenHandler;
         this.wechatProperties = wechatProperties;
         this.restTemplate = restTemplate;
