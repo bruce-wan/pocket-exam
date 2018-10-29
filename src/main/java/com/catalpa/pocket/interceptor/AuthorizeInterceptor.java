@@ -33,7 +33,7 @@ public class AuthorizeInterceptor extends HandlerInterceptorAdapter {
         AccessTokenPayload accessTokenPayload = tokenHandler.validate(authorization);
 
         String platformId = accessTokenPayload.getPlatformId();
-        Platform platform = platformService.getPlatformById(platformId);
+        Platform platform = platformService.selectById(platformId);
         request.setAttribute("platform", platform);
 
         return super.preHandle(request, response, handler);

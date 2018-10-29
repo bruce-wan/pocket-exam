@@ -30,7 +30,7 @@ public class BasicTokenHandlerImpl implements TokenHandler {
 
     @Override
     public AccessToken generate(String tokenType, int loginExpires, AccessTokenPayload accessTokenPayload) {
-        Platform platform = platformService.getPlatformById(accessTokenPayload.getPlatformId());
+        Platform platform = platformService.selectById(accessTokenPayload.getPlatformId());
 
         String baseStr = String.format("%s:%s", platform.getPlatformId(), platform.getPlatformSecret());
         try {
@@ -58,7 +58,7 @@ public class BasicTokenHandlerImpl implements TokenHandler {
                 String platformId = split[0];
                 String platformSecret = split[1];
 
-                Platform platform = platformService.getPlatformById(platformId);
+                Platform platform = platformService.selectById(platformId);
                 if (platformSecret.equals(platform.getPlatformSecret())) {
                     AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
                     accessTokenPayload.setPlatformId(platformId);
