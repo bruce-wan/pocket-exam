@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catalpa.pocket.mapper.UserPermissionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.catalpa.pocket.entity.UserPermission">
+        <id column="id" property="id" />
+    <result column="del_flg" property="delFlg" />
+    <result column="created_date" property="createdDate" />
+    <result column="updated_date" property="updatedDate" />
+        <result column="user_id" property="userId" />
+        <result column="permission_id" property="permissionId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        del_flg,
+        created_date,
+        updated_date,
+        id, user_id, permission_id
+    </sql>
+
+</mapper>

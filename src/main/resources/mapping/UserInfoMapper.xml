@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.catalpa.pocket.mapper.UserInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.catalpa.pocket.entity.UserInfo">
+        <id column="id" property="id" />
+    <result column="del_flg" property="delFlg" />
+    <result column="created_date" property="createdDate" />
+    <result column="updated_date" property="updatedDate" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="nick_name" property="nickName" />
+        <result column="gender" property="gender" />
+        <result column="head_img_url" property="headImgUrl" />
+        <result column="salt" property="salt" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        del_flg,
+        created_date,
+        updated_date,
+        id, username, password, nick_name, gender, head_img_url, salt
+    </sql>
+
+</mapper>

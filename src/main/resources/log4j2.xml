@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="pattern">[%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p] [%t] - %l  %m%n</Property>
+        <Property name="catalina.base">e:/test</Property>
+        <Property name="filename">pocket-exam</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="myConsole" target="SYSTEM_OUT">
+            <PatternLayout>
+                <Pattern>${pattern}</Pattern>
+            </PatternLayout>
+        </Console>
+        <RollingFile name="activeAppender" fileName="${catalina.base}/logs/${filename}.log" filePattern="${catalina.base}/logs/$${date:yyyy-MM}/${filename}-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>${pattern}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="250 MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="com.catalpa.pocket" level="DEBUG" additivity="false">
+            <AppenderRef ref="myConsole"/>
+            <AppenderRef ref="activeAppender"/>
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="myConsole"/>
+            <AppenderRef ref="activeAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>
