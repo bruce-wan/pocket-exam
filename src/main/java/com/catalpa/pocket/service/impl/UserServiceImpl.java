@@ -166,7 +166,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserIdentity addUserIdentity(Long id, String openid, String platformId) {
-        return null;
+    public UserIdentity addUserIdentity(Long userId, String thirdPartyId, String platformId) {
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setUserId(userId);
+        userIdentity.setThirdPartyId(thirdPartyId);
+        userIdentity.setPlatformId(platformId);
+
+        userIdentityMapper.insert(userIdentity);
+        return userIdentity;
     }
 }

@@ -14,5 +14,5 @@ public interface UserService {
 
     UserData getUserByThirdPartyId(String platformId, String thirdPartyId);
 
-    UserIdentity addUserIdentity(Long id, String openid, String platformId);
+    UserIdentity addUserIdentity(Long userId, String thirdPartyId, String platformId);
 }

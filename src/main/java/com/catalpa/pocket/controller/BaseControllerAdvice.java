@@ -1,6 +1,7 @@
 package com.catalpa.pocket.controller;
 
 import com.alibaba.druid.support.json.JSONUtils;
+import com.alibaba.fastjson.JSONObject;
 import com.catalpa.pocket.error.Error;
 import com.catalpa.pocket.error.ApplicationException;
 import lombok.extern.log4j.Log4j2;
@@ -28,14 +29,14 @@ public class BaseControllerAdvice {
     public void processException(Exception ex, HttpServletRequest request, HttpServletResponse response) {
         log.error("Catch Exception", ex);
         Map payload = new HashMap();
-        processError("500", "5001", ex.getMessage(), response);
+        processError("500", "5001", ex.getClass().getName(), response);
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void processRuntimeException(RuntimeException ex, HttpServletRequest request, HttpServletResponse response) {
         log.error("Catch RuntimeException", ex);
-        processError("500", "5002", ex.getMessage(), response);
+        processError("500", "5002", ex.getClass().getName(), response);
     }
 
     @ExceptionHandler(ApplicationException.class)

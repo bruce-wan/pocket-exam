@@ -16,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -31,16 +33,20 @@ import java.util.List;
 @EnableConfigurationProperties(value = {WechatProperties.class})
 public class SocialServiceWechatImpl implements SocialService, WechatService {
 
+    private static final String MINIPROGRAM_SESSIONKEY = "miniprogram_session_key";
+
     private final WechatProperties wechatProperties;
     private final RestTemplate restTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
     private final TokenHandler tokenHandler;
     private final UserService userService;
 
     @Autowired
-    public SocialServiceWechatImpl(@Qualifier("tokenHandlerDispatcher") TokenHandler tokenHandler, WechatProperties wechatProperties, RestTemplate restTemplate, UserService userService) {
+    public SocialServiceWechatImpl(@Qualifier("tokenHandlerDispatcher") TokenHandler tokenHandler, WechatProperties wechatProperties, RestTemplate restTemplate, RedisTemplate<String, String> redisTemplate, UserService userService) {
         this.tokenHandler = tokenHandler;
         this.wechatProperties = wechatProperties;
         this.restTemplate = restTemplate;
+        this.redisTemplate = redisTemplate;
         this.userService = userService;
 
         if (log.isDebugEnabled()) {
@@ -86,7 +92,13 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
     }
 
     private UserData getUserData(String platformId, String code, String encryptedData, String iv) {
-        JSONObject sessionKeyJson = getSessionKey(code);
+        JSONObject sessionKeyJson;
+        if (StringUtils.isNotBlank(code)) {
+            sessionKeyJson = getSessionKey(code);
+            redisTemplate.opsForValue().set(MINIPROGRAM_SESSIONKEY, sessionKeyJson.toJSONString());
+        } else {
+            sessionKeyJson = JSONObject.parseObject(redisTemplate.opsForValue().get(MINIPROGRAM_SESSIONKEY));
+        }
 //        JSONObject sessionKeyJson = new JSONObject();
 //        sessionKeyJson.put("openid", "o4j8X0Q-LTnxp0o_y1ops0pwaWsM");
 //        sessionKeyJson.put("unionid", "od63W05TovzFY9Xwtm-ebOQ2WhcY");
@@ -96,6 +108,11 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
             log.debug("input encryptedData:" + encryptedData + " and iv: " + iv);
         }
 
+        if (sessionKeyJson == null) {
+            String message = "can not get available session key";
+            log.error(message);
+            throw new ApplicationException(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "5003", message);
+        }
         String openid = sessionKeyJson.getString("openid");
         String sessionKey = sessionKeyJson.getString("session_key");
         String unionid = sessionKeyJson.getString("unionid");
@@ -107,7 +124,13 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
                 String decrypt = CryptoUtil.aesCbcDecrypt(encryptedData, sessionKey, iv);
 //                String decrypt = "{\"openId\":\"o4j8X0Q-LTnxp0o_y1ops0pwaWsM\",\"nickName\":\"( *¯ ꒳¯*)ok!!\",\"gender\":1,\"language\":\"zh_CN\",\"city\":\"\",\"province\":\"\",\"country\":\"Albania\",\"avatarUrl\":\"https://wx.qlogo.cn/mmopen/vi_32/DYAIOgq83eqQ4Qib7yhHB8zNwvibuIchefLAXyLjTj9vb2lRWWUwONrDYMIAxlpRoibzq21eUcicMUJqoxZNNXVtvA/132\",\"unionId\":\"od63W05TovzFY9Xwtm-ebOQ2WhcY\",\"watermark\":{\"timestamp\":1531215296,\"appid\":\"wx65041ea5429cf1ec\"}}";
                 log.info(decrypt);
-                userData = JSONObject.parseObject(decrypt, UserData.class);
+                try {
+                    userData = JSONObject.parseObject(decrypt, UserData.class);
+                } catch (Exception e) {
+                    String message = "decrypt data can not convert to user data";
+                    log.error(message);
+                    throw new ApplicationException(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "5004", message);
+                }
                 userService.createUser(platformId, userData);
             }
         } else {
@@ -140,7 +163,6 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
             log.error(errorMessage);
             throw new ApplicationException("500", errorMessage);
         }
-        log.debug("openid: " + sessionKey.getString("openid") + ", session_key: " + sessionKey.getString("session_key"));
         return sessionKey;
     }
 }
