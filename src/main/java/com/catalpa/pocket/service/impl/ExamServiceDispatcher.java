@@ -30,7 +30,7 @@ public class ExamServiceDispatcher implements ExamService {
                 examData = abacusExamService.generateExamData(catelog, level);
                 break;
             default:
-                throw new ApplicationException("500", "50001", "unsupported exam catelog:" + catelog);
+                throw new ApplicationException("50001", "unsupported exam catelog:" + catelog);
         }
 
         return examData;

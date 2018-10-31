@@ -38,7 +38,9 @@ public class SocialServiceDispatcher implements SocialService {
                 loginResponse = wechatSocialService.login(platform, loginRequest);
                 break;
             default:
-                throw new ApplicationException("500", "50001", "unsupported platform:" + platform);
+                String message = String.format("unsupported platform: %s", platform);
+                log.error(message);
+                throw new ApplicationException("50001", message);
         }
         return loginResponse;
     }

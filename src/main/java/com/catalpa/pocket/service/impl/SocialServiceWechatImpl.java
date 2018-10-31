@@ -111,7 +111,7 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
         if (sessionKeyJson == null) {
             String message = "can not get available session key";
             log.error(message);
-            throw new ApplicationException(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "5003", message);
+            throw new ApplicationException("5003", message);
         }
         String openid = sessionKeyJson.getString("openid");
         String sessionKey = sessionKeyJson.getString("session_key");
@@ -129,7 +129,7 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
                 } catch (Exception e) {
                     String message = "decrypt data can not convert to user data";
                     log.error(message);
-                    throw new ApplicationException(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "5004", message);
+                    throw new ApplicationException("5004", message);
                 }
                 userService.createUser(platformId, userData);
             }
@@ -161,7 +161,7 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
         if (sessionKey.getString("errcode") != null) {
             String errorMessage = "get session key error: " + sessionKey.getString("errmsg");
             log.error(errorMessage);
-            throw new ApplicationException("500", errorMessage);
+            throw new ApplicationException("5001", errorMessage);
         }
         return sessionKey;
     }

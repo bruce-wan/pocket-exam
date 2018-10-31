@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
         if (count != 0) {
             String message = "duplicated username: " + username;
             log.error(message);
-            throw new ApplicationException("500", "50002", message);
+            throw new ApplicationException("50002", message);
         }
 
         String salt = RandomUtil.generateString(false, true, true, null, 10);
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             String message = String.format("can create new user with data: %s", userData);
             log.error(message);
-            throw new ApplicationException("500", "50002", message, e);
+            throw new ApplicationException("50002", message, e);
         }
 
         Long userId = userInfo.getId();
@@ -155,7 +155,7 @@ public class UserServiceImpl implements UserService {
             if (identities.size() > 1) {
                 String message = "invalid user identity with platform is " + platformId + " and thirdPartyId is " + thirdPartyId;
                 log.error(message);
-                throw new ApplicationException("500", "50003", message);
+                throw new ApplicationException("50003", message);
             } else {
                 UserIdentity identity = identities.get(0);
                 return this.getUserById(identity.getUserId());

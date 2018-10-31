@@ -8,25 +8,26 @@ import org.springframework.http.HttpStatus;
 public class ResourceNotFoundException extends ApplicationException {
 
     private static final long serialVersionUID = 5620329981299896494L;
+
     private static final String HTTP_CODE = HttpStatus.BAD_REQUEST.toString();
 
-    public ResourceNotFoundException(String errorCode) {
-        super(HTTP_CODE, errorCode);
-    }
-
     public ResourceNotFoundException(String errorCode, String message) {
-        super(HTTP_CODE, errorCode, message);
+        super(errorCode, message);
+        super.httpCode = HTTP_CODE;
     }
 
     public ResourceNotFoundException(String errorCode, String message, Throwable cause) {
-        super(HTTP_CODE, errorCode, message, cause);
+        super(errorCode, message, cause);
+        super.httpCode = HTTP_CODE;
     }
 
     public ResourceNotFoundException(String errorCode, Throwable cause) {
-        super(HTTP_CODE, errorCode, cause);
+        super(errorCode, cause);
+        super.httpCode = HTTP_CODE;
     }
 
     public ResourceNotFoundException(String errorCode, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(HTTP_CODE, errorCode, message, cause, enableSuppression, writableStackTrace);
+        super(errorCode, message, cause, enableSuppression, writableStackTrace);
+        super.httpCode = HTTP_CODE;
     }
 }
