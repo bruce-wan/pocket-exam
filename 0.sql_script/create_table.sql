@@ -193,47 +193,24 @@ CREATE TABLE `t_question_bank` (
 DROP TABLE IF EXISTS `t_exam_paper`;
 CREATE TABLE `t_exam_paper` (
   `id`             bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id`        bigint(20) UNSIGNED NOT NULL,
   `name`           varchar(100)                 DEFAULT NULL,
   `catalog`        tinyint(2) UNSIGNED NOT NULL DEFAULT 0,
   `level`          tinyint(2) UNSIGNED NOT NULL DEFAULT 1,
-  `status`         tinyint(2) UNSIGNED NOT NULL DEFAULT 1
-  COMMENT '试卷状态，1正常可用，0不可用',
   `total_score`    int(5)                       DEFAULT NULL,
   `pass_score`     int(5)                       DEFAULT NULL,
-  `question_order` tinyint(2) UNSIGNED NOT NULL DEFAULT 0
-  COMMENT '0正常，1随机',
-  `papertype`      tinyint(2) UNSIGNED NOT NULL DEFAULT 0
-  COMMENT '0普通试卷，1随机生成试卷',
+  `user_score`     int(5)                       DEFAULT NULL,
+  `score_grade`    tinyint(2) UNSIGNED NOT NULL DEFAULT 0
+  COMMENT '0.不及格，1.及格，2.良好，3.优秀',
+  `start_time`     datetime                     DEFAULT NULL,
+  `end_time`       datetime                     DEFAULT NULL,
+  `duration`       smallint(10)        NOT NULL DEFAULT 0,
   `content`        longtext,
   `remark`         text,
   `del_flg`        tinyint(2) UNSIGNED NOT NULL DEFAULT 0
   COMMENT '0 - not deleted, 1 - deleted',
   `created_date`   timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_date`   timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP
-  ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARACTER SET = utf8mb4
-  AUTO_INCREMENT = 1;
-
-
-DROP TABLE IF EXISTS `t_exam_history`;
-CREATE TABLE `t_exam_history` (
-  `id`           bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `paper_id`     bigint(20) UNSIGNED NOT NULL,
-  `user_id`      bigint(20) UNSIGNED NOT NULL,
-  `start_time`   datetime                     DEFAULT NULL,
-  `end_time`     datetime                     DEFAULT NULL,
-  `total_score`  int(5) UNSIGNED              DEFAULT NULL,
-  `pass_score`   int(5) UNSIGNED              DEFAULT NULL,
-  `user_score`   int(5) UNSIGNED              DEFAULT NULL,
-  `content`      longtext,
-  `remark`       text,
-  `del_flg`      tinyint(2) UNSIGNED NOT NULL DEFAULT 0
-  COMMENT '0 - not deleted, 1 - deleted',
-  `created_date` timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_date` timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP
   ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 )

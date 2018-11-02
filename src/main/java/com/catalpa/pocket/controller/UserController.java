@@ -1,7 +1,8 @@
 package com.catalpa.pocket.controller;
 
-
+import com.baomidou.mybatisplus.plugins.Page;
 import com.catalpa.pocket.entity.Platform;
+import com.catalpa.pocket.model.ExamData;
 import com.catalpa.pocket.model.UserData;
 import com.catalpa.pocket.service.UserService;
 import lombok.extern.log4j.Log4j2;
@@ -35,6 +36,23 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserData createUser(@RequestAttribute Platform platform, @RequestBody UserData userData) throws UnsupportedEncodingException {
         return userService.createUser(platform.getPlatformId(), userData);
+    }
+
+    @GetMapping("/{userId}/exams")
+    public Page<ExamData> getUserExams(@RequestAttribute Platform platform,
+                                       @PathVariable Long userId,
+                                       @RequestParam(required = false) Integer catalog,
+                                       @RequestParam(required = false) Integer level,
+                                       @RequestParam(defaultValue = "1") Integer pageNum,
+                                       @RequestParam(defaultValue = "10") Integer pageSize) {
+
+        return userService.getUserExams(new Page<>(pageNum, pageSize), platform, userId, catalog, level);
+    }
+
+    @PostMapping("/{userId}/exams")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ExamData addUserExams(@RequestAttribute Platform platform, @PathVariable Long userId, @RequestBody ExamData examData) {
+        return userService.addUserExams(platform, userId, examData);
     }
 }
 

@@ -17,6 +17,7 @@ public class QuestionData {
     private Long score;
     private String title;
     private String answer;
+    private String userAnswer;
     private List<String> options;
 
 }

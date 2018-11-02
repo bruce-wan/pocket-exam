@@ -2,6 +2,7 @@ package com.catalpa.pocket.model;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -11,11 +12,18 @@ import java.util.List;
 public class ExamData {
 
     private Long id;
+    private Long userId;
     private String name;
     private Integer catalog;
     private Integer level;
     private Integer totalScore;
     private Integer passScore;
+    private Integer userScore;
+    private Integer scoreGrade;
+    private Date startTime;
+    private Date endTime;
+    private Integer duration;
+    private String content;
     private String remark;
     private List<QuestionData> questionDatas;
 }

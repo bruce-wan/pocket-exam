@@ -1,12 +1,21 @@
 package com.catalpa.pocket.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.catalpa.pocket.config.ShiroProperties;
+import com.catalpa.pocket.entity.ExamPaper;
+import com.catalpa.pocket.entity.Platform;
 import com.catalpa.pocket.entity.UserIdentity;
 import com.catalpa.pocket.entity.UserInfo;
 import com.catalpa.pocket.error.ApplicationException;
+import com.catalpa.pocket.error.ResourceNotFoundException;
+import com.catalpa.pocket.mapper.ExamPaperMapper;
 import com.catalpa.pocket.mapper.UserIdentityMapper;
 import com.catalpa.pocket.mapper.UserInfoMapper;
+import com.catalpa.pocket.model.ExamData;
+import com.catalpa.pocket.model.QuestionData;
 import com.catalpa.pocket.model.UserData;
 import com.catalpa.pocket.service.UserService;
 import com.catalpa.pocket.util.CryptoUtil;
@@ -22,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by wanchuan01 on 2018/10/23.
@@ -34,12 +44,14 @@ public class UserServiceImpl implements UserService {
     private final ShiroProperties shiroProperties;
     private final UserInfoMapper userInfoMapper;
     private final UserIdentityMapper userIdentityMapper;
+    private final ExamPaperMapper examPaperMapper;
 
     @Autowired
-    public UserServiceImpl(ShiroProperties shiroProperties, UserInfoMapper userInfoMapper, UserIdentityMapper userIdentityMapper) {
+    public UserServiceImpl(ShiroProperties shiroProperties, UserInfoMapper userInfoMapper, UserIdentityMapper userIdentityMapper, ExamPaperMapper examPaperMapper) {
         this.shiroProperties = shiroProperties;
         this.userInfoMapper = userInfoMapper;
         this.userIdentityMapper = userIdentityMapper;
+        this.examPaperMapper = examPaperMapper;
 
         if (log.isDebugEnabled()) {
             log.debug("getHashAlgorithmName: =====>" + shiroProperties.getHashAlgorithmName());
@@ -175,4 +187,77 @@ public class UserServiceImpl implements UserService {
         userIdentityMapper.insert(userIdentity);
         return userIdentity;
     }
+
+    @Override
+    public ExamData addUserExams(Platform platform, Long userId, ExamData examData) {
+
+        UserInfo userInfo = userInfoMapper.selectById(userId);
+        if (userInfo == null) {
+            String message = "user has not found with userid is " + userId;
+            log.error(message);
+            throw new ResourceNotFoundException("40001", message);
+        }
+
+        ExamPaper examPaper = new ExamPaper();
+
+        examPaper.setUserId(userId);
+        examPaper.setName(examData.getName());
+        examPaper.setCatalog(examData.getCatalog());
+        examPaper.setLevel(examData.getLevel());
+        examPaper.setTotalScore(examData.getTotalScore());
+        examPaper.setPassScore(examData.getPassScore());
+        examPaper.setUserScore(examData.getUserScore());
+        examPaper.setScoreGrade(examData.getScoreGrade());
+        examPaper.setStartTime(examData.getStartTime());
+        examPaper.setEndTime(examData.getEndTime());
+        examPaper.setDuration(examData.getDuration());
+        examPaper.setContent(JSONObject.toJSONString(examData.getQuestionDatas()));
+        examPaper.setRemark(examData.getRemark());
+
+        examPaperMapper.insert(examPaper);
+        examData.setId(examPaper.getId());
+
+        return examData;
+    }
+
+    @Override
+    public Page<ExamData> getUserExams(Page<ExamData> page, Platform platform, Long userId, Integer catalog, Integer level) {
+        EntityWrapper<ExamPaper> wrapper = new EntityWrapper<>();
+        ExamPaper examPaper = new ExamPaper();
+        examPaper.setUserId(userId);
+        examPaper.setCatalog(catalog);
+        examPaper.setLevel(level);
+
+        List<String> columns = new ArrayList<>();
+        columns.add("start_time");
+        wrapper.orderDesc(columns);
+
+        List<ExamPaper> examPaperList = examPaperMapper.selectPage(page, wrapper);
+
+        List<ExamData> records = examPaperList.stream().map(paper -> {
+            ExamData examData = new ExamData();
+
+            examData.setId(paper.getId());
+            examData.setUserId(paper.getUserId());
+            examData.setName(paper.getName());
+            examData.setCatalog(paper.getCatalog());
+            examData.setLevel(paper.getLevel());
+            examData.setTotalScore(paper.getTotalScore());
+            examData.setPassScore(paper.getPassScore());
+            examData.setUserScore(paper.getUserScore());
+            examData.setScoreGrade(paper.getScoreGrade());
+            examData.setStartTime(paper.getStartTime());
+            examData.setEndTime(paper.getEndTime());
+            examData.setDuration(paper.getDuration());
+            examData.setRemark(paper.getRemark());
+            List<QuestionData> questionDatas = JSONArray.parseArray(paper.getContent(), QuestionData.class);
+            examData.setQuestionDatas(questionDatas);
+
+            return examData;
+        }).collect(Collectors.toList());
+        page.setRecords(records);
+
+        return page;
+    }
+
 }

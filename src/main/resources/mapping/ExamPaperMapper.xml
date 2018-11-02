@@ -8,14 +8,17 @@
     <result column="del_flg" property="delFlg" />
     <result column="created_date" property="createdDate" />
     <result column="updated_date" property="updatedDate" />
+        <result column="user_id" property="userId" />
         <result column="name" property="name" />
         <result column="catalog" property="catalog" />
         <result column="level" property="level" />
-        <result column="status" property="status" />
         <result column="total_score" property="totalScore" />
         <result column="pass_score" property="passScore" />
-        <result column="question_order" property="questionOrder" />
-        <result column="papertype" property="papertype" />
+        <result column="user_score" property="userScore" />
+        <result column="score_grade" property="scoreGrade" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+        <result column="duration" property="duration" />
         <result column="content" property="content" />
         <result column="remark" property="remark" />
     </resultMap>
@@ -25,7 +28,7 @@
         del_flg,
         created_date,
         updated_date,
-        id, name, catalog, level, status, total_score, pass_score, question_order, papertype, content, remark
+        id, user_id, name, catalog, level, total_score, pass_score, user_score, score_grade, start_time, end_time, duration, content, remark
     </sql>
 
 </mapper>
