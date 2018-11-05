@@ -22,19 +22,10 @@ import java.util.List;
 @Service("abacusExamService")
 public class ExamServiceAbacusImpl implements ExamService {
 
-    private final ExamPaperMapper examPaperMapper;
-
-    @Autowired
-    public ExamServiceAbacusImpl(ExamPaperMapper examPaperMapper) {
-        this.examPaperMapper = examPaperMapper;
-    }
-
     @Override
     public ExamData generateExamData(Integer catelog, Integer level) {
 
-        ExamData examData = getExamData(catelog, level);
-
-        return examData;
+        return getExamData(catelog, level);
     }
 
     private ExamData getExamData(Integer catelog, Integer level) {
@@ -48,6 +39,8 @@ public class ExamServiceAbacusImpl implements ExamService {
         examData.setCatalog(catelog);
         examData.setLevel(level);
         examData.setName(String.format("%d位数%d笔的加减法珠心算", digit, size));
+        examData.setTotalScore(amount);
+        examData.setPassScore(amount);
 
         List<QuestionData> questionDataList = new ArrayList<>();
         for (int index = 0; index < amount; index++) {
