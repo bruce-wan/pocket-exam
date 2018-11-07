@@ -1,9 +1,9 @@
 package com.catalpa.pocket.controller;
 
-import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.fastjson.JSONObject;
-import com.catalpa.pocket.error.Error;
 import com.catalpa.pocket.error.ApplicationException;
+import com.catalpa.pocket.error.Error;
+import com.catalpa.pocket.error.ResourceNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,8 +42,15 @@ public class BaseControllerAdvice {
     @ExceptionHandler(ApplicationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void processApplicationException(ApplicationException ex, HttpServletRequest request, HttpServletResponse response) {
-        log.error("Catch RuntimeException", ex);
+        log.error("Catch ApplicationException", ex);
         processError("500", "5003", ex.getMessage(), response);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public void processApplicationException(ResourceNotFoundException ex, HttpServletRequest request, HttpServletResponse response) {
+        log.error("Catch ResourceNotFoundException", ex);
+        processError("400", ex.getErrorCode(), ex.getMessage(), response);
     }
 
     private void processError(String httpCode, String errorCode, String description, HttpServletResponse httpResponse) {
@@ -53,7 +60,7 @@ public class BaseControllerAdvice {
         error.setErrorDescription(description);
         try {
             httpResponse.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-            httpResponse.getWriter().write(JSONUtils.toJSONString(error));
+            httpResponse.getWriter().write(JSONObject.toJSONString(error));
         } catch (IOException e) {
             log.error("Error writing to the response", e);
         }

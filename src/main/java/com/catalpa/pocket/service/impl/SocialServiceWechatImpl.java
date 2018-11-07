@@ -5,6 +5,7 @@ import com.catalpa.pocket.config.WechatProperties;
 import com.catalpa.pocket.entity.Platform;
 import com.catalpa.pocket.entity.UserIdentity;
 import com.catalpa.pocket.error.ApplicationException;
+import com.catalpa.pocket.error.ResourceNotFoundException;
 import com.catalpa.pocket.handler.TokenHandler;
 import com.catalpa.pocket.model.*;
 import com.catalpa.pocket.service.SocialService;
@@ -67,6 +68,11 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
         String iv = loginRequest.getIv();
 
         UserData userData = getUserData(platform.getPlatformId(), code, encryptedData, iv);
+        if (userData == null) {
+            String message = "user not exists";
+            log.error(message);
+            throw new ResourceNotFoundException("40099", message);
+        }
 
         AccessTokenPayload accessTokenPayload = new AccessTokenPayload();
         accessTokenPayload.setPlatformId(platform.getPlatformId());
