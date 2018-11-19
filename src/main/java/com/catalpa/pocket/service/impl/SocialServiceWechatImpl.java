@@ -110,7 +110,7 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
 //        sessionKeyJson.put("session_key", "session_key");
 
         if (log.isDebugEnabled()) {
-            log.debug("input encryptedData:" + encryptedData + " and iv: " + iv);
+            log.debug("input skey: " + skey + "encryptedData:" + encryptedData + " and iv: " + iv);
         }
 
         if (sessionKeyJson == null) {
