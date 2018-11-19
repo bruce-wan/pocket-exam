@@ -22,6 +22,7 @@ public class UserData {
     private String headImgUrl;
     private String avatarUrl;
     private String salt;
+    private String skey;
     private String openId;
     private String unionId;
 

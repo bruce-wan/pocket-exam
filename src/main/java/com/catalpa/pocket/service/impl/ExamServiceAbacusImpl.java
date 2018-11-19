@@ -1,8 +1,11 @@
 package com.catalpa.pocket.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.catalpa.pocket.entity.ExamPaper;
 import com.catalpa.pocket.enums.ExamLevelEnum;
 import com.catalpa.pocket.enums.QuestionTypeEnum;
+import com.catalpa.pocket.error.ResourceNotFoundException;
 import com.catalpa.pocket.mapper.ExamPaperMapper;
 import com.catalpa.pocket.model.ExamData;
 import com.catalpa.pocket.model.QuestionData;
@@ -22,13 +25,15 @@ import java.util.List;
 @Service("abacusExamService")
 public class ExamServiceAbacusImpl implements ExamService {
 
-    @Override
-    public ExamData generateExamData(Integer catelog, Integer level) {
+    private final ExamPaperMapper examPaperMapper;
 
-        return getExamData(catelog, level);
+    @Autowired
+    public ExamServiceAbacusImpl(ExamPaperMapper examPaperMapper) {
+        this.examPaperMapper = examPaperMapper;
     }
 
-    private ExamData getExamData(Integer catelog, Integer level) {
+    @Override
+    public ExamData generateExamData(Integer catelog, Integer level) {
         JSONObject levelContent = JSONObject.parseObject(ExamLevelEnum.getByLevel(level).getContent());
 
         int digit = levelContent.getIntValue("digit");
@@ -96,6 +101,38 @@ public class ExamServiceAbacusImpl implements ExamService {
             questionDataList.add(questionData);
         }
         examData.setQuestionDatas(questionDataList);
+        return examData;
+    }
+
+    @Override
+    public ExamData getExamDataById(Integer catelog, Long examId) {
+
+        ExamPaper examPaper = examPaperMapper.selectById(examId);
+
+        ExamData examData = null;
+        if (examPaper != null) {
+            examData = new ExamData();
+            examData.setId(examPaper.getId());
+            examData.setUserId(examPaper.getUserId());
+            examData.setName(examPaper.getName());
+            examData.setCatalog(examPaper.getCatalog());
+            examData.setLevel(examPaper.getLevel());
+            examData.setTotalScore(examPaper.getTotalScore());
+            examData.setPassScore(examPaper.getPassScore());
+            examData.setUserScore(examPaper.getUserScore());
+            examData.setScoreGrade(examPaper.getScoreGrade());
+            examData.setStartTime(examPaper.getStartTime());
+            examData.setEndTime(examPaper.getEndTime());
+            examData.setDuration(examPaper.getDuration());
+            examData.setRemark(examPaper.getRemark());
+            List<QuestionData> questionDatas = JSONArray.parseArray(examPaper.getContent(), QuestionData.class);
+            examData.setQuestionDatas(questionDatas);
+        } else {
+            String message = "ExamData is not exists with examId is " + examId;
+            log.error(message);
+            throw new ResourceNotFoundException("40001", message);
+        }
+
         return examData;
     }
 

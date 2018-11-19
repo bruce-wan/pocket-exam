@@ -4,16 +4,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.catalpa.pocket.config.Constants;
 import com.catalpa.pocket.config.ShiroProperties;
-import com.catalpa.pocket.entity.ExamPaper;
-import com.catalpa.pocket.entity.Platform;
-import com.catalpa.pocket.entity.UserIdentity;
-import com.catalpa.pocket.entity.UserInfo;
+import com.catalpa.pocket.entity.*;
 import com.catalpa.pocket.error.ApplicationException;
 import com.catalpa.pocket.error.ResourceNotFoundException;
 import com.catalpa.pocket.mapper.ExamPaperMapper;
 import com.catalpa.pocket.mapper.UserIdentityMapper;
 import com.catalpa.pocket.mapper.UserInfoMapper;
+import com.catalpa.pocket.mapper.UserSessionMapper;
 import com.catalpa.pocket.model.ExamData;
 import com.catalpa.pocket.model.QuestionData;
 import com.catalpa.pocket.model.UserData;
@@ -26,9 +25,12 @@ import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,14 +46,18 @@ public class UserServiceImpl implements UserService {
     private final ShiroProperties shiroProperties;
     private final UserInfoMapper userInfoMapper;
     private final UserIdentityMapper userIdentityMapper;
+    private final UserSessionMapper userSessionMapper;
     private final ExamPaperMapper examPaperMapper;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Autowired
-    public UserServiceImpl(ShiroProperties shiroProperties, UserInfoMapper userInfoMapper, UserIdentityMapper userIdentityMapper, ExamPaperMapper examPaperMapper) {
+    public UserServiceImpl(ShiroProperties shiroProperties, UserInfoMapper userInfoMapper, UserIdentityMapper userIdentityMapper, UserSessionMapper userSessionMapper, ExamPaperMapper examPaperMapper, RedisTemplate<String, String> redisTemplate) {
         this.shiroProperties = shiroProperties;
         this.userInfoMapper = userInfoMapper;
         this.userIdentityMapper = userIdentityMapper;
+        this.userSessionMapper = userSessionMapper;
         this.examPaperMapper = examPaperMapper;
+        this.redisTemplate = redisTemplate;
 
         if (log.isDebugEnabled()) {
             log.debug("getHashAlgorithmName: =====>" + shiroProperties.getHashAlgorithmName());
@@ -87,6 +93,9 @@ public class UserServiceImpl implements UserService {
         userInfo.setPassword(simpleHash.toString());
         userInfo.setNickName(userData.getNickName());
         userInfo.setGender(userData.getGender());
+        userInfo.setCity(userData.getCity());
+        userInfo.setProvince(userData.getProvince());
+        userInfo.setCountry(userData.getCountry());
         userInfo.setHeadImgUrl(userData.getHeadImgUrl());
         userInfo.setSalt(salt);
         try {
@@ -136,6 +145,9 @@ public class UserServiceImpl implements UserService {
             userData.setUsername(userInfo.getUsername());
             userData.setNickName(userInfo.getNickName());
             userData.setGender(userInfo.getGender());
+            userData.setCity(userInfo.getCity());
+            userData.setProvince(userInfo.getProvince());
+            userData.setCountry(userInfo.getCountry());
             userData.setHeadImgUrl(userInfo.getHeadImgUrl());
 
             EntityWrapper<UserIdentity> wrapper = new EntityWrapper<UserIdentity>();
@@ -189,6 +201,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserSession saveOrUpdateUserSession(Long userId, String skey, String sessionKeyJson) {
+
+        UserSession params = new UserSession();
+        params.setUserId(userId);
+
+        UserSession userSession = userSessionMapper.selectOne(params);
+        if (userSession != null) {
+            redisTemplate.delete(Constants.MINIPROGRAM_SESSIONKEY + userSession.getSkey());
+            userSession.setSkey(skey);
+            userSession.setSessionKey(sessionKeyJson);
+            userSessionMapper.updateById(userSession);
+        } else {
+            userSession = new UserSession();
+            userSession.setUserId(userId);
+            userSession.setSkey(skey);
+            userSession.setSessionKey(sessionKeyJson);
+            userSessionMapper.insert(userSession);
+        }
+        redisTemplate.opsForValue().set(Constants.MINIPROGRAM_SESSIONKEY + skey, sessionKeyJson);
+        return userSession;
+    }
+
+    @Override
     public ExamData addUserExams(Platform platform, Long userId, ExamData examData) {
 
         UserInfo userInfo = userInfoMapper.selectById(userId);
@@ -221,12 +256,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<ExamData> getUserExams(Page<ExamData> page, Platform platform, Long userId, Integer catalog, Integer level) {
+    public Page<ExamData> getUserExams(Page<ExamData> page, Platform platform, Long userId, Integer catalog, Integer level, Integer days) {
         EntityWrapper<ExamPaper> wrapper = new EntityWrapper<>();
         ExamPaper examPaper = new ExamPaper();
         examPaper.setUserId(userId);
         examPaper.setCatalog(catalog);
         examPaper.setLevel(level);
+        wrapper.setEntity(examPaper);
+
+        wrapper.and().ge("start_time", Date.from(ZonedDateTime.now().minusDays(days).toInstant()));
 
         List<String> columns = new ArrayList<>();
         columns.add("start_time");

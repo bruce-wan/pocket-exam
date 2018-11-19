@@ -24,15 +24,21 @@ public class ExamServiceDispatcher implements ExamService {
 
     @Override
     public ExamData generateExamData(Integer catelog, Integer level) {
-        ExamData examData = null;
+
+        return switchHandler(catelog).generateExamData(catelog, level);
+    }
+
+    @Override
+    public ExamData getExamDataById(Integer catelog, Long examId) {
+        return switchHandler(catelog).getExamDataById(catelog, examId);
+    }
+
+    private ExamService switchHandler(Integer catelog) {
         switch (catelog) {
-            case 1:
-                examData = abacusExamService.generateExamData(catelog, level);
-                break;
+            case 0:
+                return abacusExamService;
             default:
                 throw new ApplicationException("50001", "unsupported exam catelog:" + catelog);
         }
-
-        return examData;
     }
 }

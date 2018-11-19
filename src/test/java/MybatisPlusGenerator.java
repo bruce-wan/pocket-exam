@@ -45,7 +45,7 @@ public class MybatisPlusGenerator {
         StrategyConfig strategyConfig = new StrategyConfig();
         strategyConfig.setTablePrefix("t_");
         strategyConfig.setNaming(NamingStrategy.underline_to_camel);
-//        strategyConfig.setInclude("t_user_info", "t_user_identity", "t_role_info", "t_permission_info", "t_user_role", "t_user_permission", "t_role_permission");
+        strategyConfig.setInclude("t_user_info");
         strategyConfig.setLogicDeleteFieldName("del_flg");
         strategyConfig.setEntityLombokModel(true);
         strategyConfig.setRestControllerStyle(true);

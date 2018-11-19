@@ -1,6 +1,7 @@
 package com.catalpa.pocket.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.catalpa.pocket.config.Constants;
 import com.catalpa.pocket.config.WechatProperties;
 import com.catalpa.pocket.entity.Platform;
 import com.catalpa.pocket.entity.UserIdentity;
@@ -18,12 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,8 +34,6 @@ import java.util.List;
 @Service("wechatSocialService")
 @EnableConfigurationProperties(value = {WechatProperties.class})
 public class SocialServiceWechatImpl implements SocialService, WechatService {
-
-    private static final String MINIPROGRAM_SESSIONKEY = "miniprogram_session_key";
 
     private final WechatProperties wechatProperties;
     private final RestTemplate restTemplate;
@@ -66,8 +65,9 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
         String code = loginRequest.getCode();
         String encryptedData = loginRequest.getEncryptedData();
         String iv = loginRequest.getIv();
+        String skey = loginRequest.getSkey();
 
-        UserData userData = getUserData(platform.getPlatformId(), code, encryptedData, iv);
+        UserData userData = getUserData(platform.getPlatformId(), skey, code, encryptedData, iv);
         if (userData == null) {
             String message = "user not exists";
             log.error(message);
@@ -78,7 +78,7 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
         accessTokenPayload.setPlatformId(platform.getPlatformId());
         accessTokenPayload.setScope(platform.getPlatformScope());
         accessTokenPayload.setUserId(userData.getId());
-        AccessToken accessToken = tokenHandler.generate("Bearer", 7200, accessTokenPayload);
+        AccessToken accessToken = tokenHandler.generate("Bearer", platform.getExpiresIn(), accessTokenPayload);
 
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setUserData(userData);
@@ -97,13 +97,12 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
         return wechatProperties.getPublicAccountToken();
     }
 
-    private UserData getUserData(String platformId, String code, String encryptedData, String iv) {
+    private UserData getUserData(String platformId, String skey, String code, String encryptedData, String iv) {
         JSONObject sessionKeyJson;
         if (StringUtils.isNotBlank(code)) {
             sessionKeyJson = getSessionKey(code);
-            redisTemplate.opsForValue().set(MINIPROGRAM_SESSIONKEY, sessionKeyJson.toJSONString());
         } else {
-            sessionKeyJson = JSONObject.parseObject(redisTemplate.opsForValue().get(MINIPROGRAM_SESSIONKEY));
+            sessionKeyJson = JSONObject.parseObject(redisTemplate.opsForValue().get(Constants.MINIPROGRAM_SESSIONKEY + skey));
         }
 //        JSONObject sessionKeyJson = new JSONObject();
 //        sessionKeyJson.put("openid", "o4j8X0Q-LTnxp0o_y1ops0pwaWsM");
@@ -126,7 +125,6 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
         UserData userData = userService.getUserByThirdPartyId(platformId, StringUtils.isNotBlank(unionid) ? unionid : openid);
         if (userData == null) {
             if (StringUtils.isNotBlank(encryptedData) && StringUtils.isNotBlank(iv)) {
-//                String skey = CryptoUtil.getHashSHA1Str(sessionKey, "utf8");
                 String decrypt = CryptoUtil.aesCbcDecrypt(encryptedData, sessionKey, iv);
 //                String decrypt = "{\"openId\":\"o4j8X0Q-LTnxp0o_y1ops0pwaWsM\",\"nickName\":\"( *¯ ꒳¯*)ok!!\",\"gender\":1,\"language\":\"zh_CN\",\"city\":\"\",\"province\":\"\",\"country\":\"Albania\",\"avatarUrl\":\"https://wx.qlogo.cn/mmopen/vi_32/DYAIOgq83eqQ4Qib7yhHB8zNwvibuIchefLAXyLjTj9vb2lRWWUwONrDYMIAxlpRoibzq21eUcicMUJqoxZNNXVtvA/132\",\"unionId\":\"od63W05TovzFY9Xwtm-ebOQ2WhcY\",\"watermark\":{\"timestamp\":1531215296,\"appid\":\"wx65041ea5429cf1ec\"}}";
                 log.info(decrypt);
@@ -137,8 +135,16 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
                     log.error(message);
                     throw new ApplicationException("5004", message);
                 }
-                userService.createUser(platformId, userData);
+            } else {
+                userData = new UserData();
+                List<UserIdentity> userIdentities = new ArrayList<>();
+                UserIdentity userOpenId = new UserIdentity();
+                userOpenId.setPlatformId(platformId);
+                userOpenId.setThirdPartyId(openid);
+                userIdentities.add(userOpenId);
+                userData.setUserIdentities(userIdentities);
             }
+            userService.createUser(platformId, userData);
         } else {
             List<UserIdentity> userIdentities = userData.getUserIdentities();
             boolean noneMatchIdentity = userIdentities.stream().noneMatch(userIdentity -> platformId.equals(userIdentity.getPlatformId()));
@@ -149,6 +155,15 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
                 }
             }
         }
+
+        return saveUserSession(userData, sessionKeyJson);
+    }
+
+    private UserData saveUserSession(UserData userData, JSONObject sessionKeyJson) {
+        String skey = CryptoUtil.getHashSHA1Str(sessionKeyJson.getString("session_key"), "utf8");
+        userData.setSkey(skey);
+
+        userService.saveOrUpdateUserSession(userData.getId(), skey, sessionKeyJson.toJSONString());
         return userData;
     }
 

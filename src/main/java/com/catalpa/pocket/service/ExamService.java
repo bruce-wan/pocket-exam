@@ -8,4 +8,6 @@ import com.catalpa.pocket.model.ExamData;
 public interface ExamService {
 
     ExamData generateExamData(Integer catelog, Integer level);
+
+    ExamData getExamDataById(Integer catelog, Long examId);
 }

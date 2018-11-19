@@ -1,14 +1,9 @@
 package com.catalpa.pocket.entity;
 
-import com.baomidou.mybatisplus.enums.IdType;
-import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
+import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.catalpa.pocket.entity.BaseEntity;
-
-import com.baomidou.mybatisplus.annotations.Version;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.baomidou.mybatisplus.enums.IdType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -19,7 +14,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author ${author}
- * @since 2018-10-23
+ * @since 2018-11-17
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -45,16 +40,12 @@ public class UserInfo extends BaseEntity {
     @TableField("nick_name")
     private String nickName;
     private Integer gender;
+    private String city;
+    private String province;
+    private String country;
     @TableField("head_img_url")
     private String headImgUrl;
     private String salt;
 
-    /**
-     * 密码盐.
-     * @return
-     */
-    @JsonIgnore
-    public String getCredentialsSalt(){
-        return this.username+this.salt;
-    }
+
 }

@@ -9,6 +9,7 @@ import lombok.Data;
 public class LoginRequest {
 
     /*mini program arguments*/
+    private String skey;
     private String code;
     private String encryptedData;
     private String iv;

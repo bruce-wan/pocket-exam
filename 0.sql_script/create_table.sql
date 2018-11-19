@@ -1,5 +1,5 @@
 -- USE `utxrkeuaz3u9no2h`;
-USE `pocket_exam`;
+-- USE `pocket_exam`;
 
 DROP TABLE IF EXISTS `t_user_info`;
 CREATE TABLE `t_user_info` (
@@ -11,6 +11,9 @@ CREATE TABLE `t_user_info` (
   COMMENT '密码',
   `nick_name`    varchar(200)                 DEFAULT NULL,
   `gender`       tinyint(2) UNSIGNED          DEFAULT NULL,
+  `city`         varchar(200)                 DEFAULT NULL,
+  `province`     varchar(200)                 DEFAULT NULL,
+  `country`      varchar(200)                 DEFAULT NULL,
   `head_img_url` varchar(200)                 DEFAULT NULL,
   `salt`         varchar(50)                  DEFAULT NULL,
   `del_flg`      tinyint(2) UNSIGNED NOT NULL DEFAULT '0'
@@ -39,6 +42,25 @@ CREATE TABLE `t_user_identity` (
   ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `u_id` (`user_id`, `platform_id`, `third_party_id`)
+)
+  ENGINE = InnoDB
+  DEFAULT CHARACTER SET = utf8mb4
+  AUTO_INCREMENT = 1;
+
+
+DROP TABLE IF EXISTS `t_user_session`;
+CREATE TABLE `t_user_session` (
+  `id`             bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT
+  COMMENT '主键ID',
+  `user_id`        bigint(20) UNSIGNED NOT NULL,
+  `skey`           char(40)            NOT NULL,
+  `session_key`    varchar(200)        NOT NULL,
+  `del_flg`        tinyint(2) UNSIGNED NOT NULL DEFAULT 0,
+  `created_date`   timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_date`   timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP
+  ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `u_id` (`user_id`, `skey`)
 )
   ENGINE = InnoDB
   DEFAULT CHARACTER SET = utf8mb4

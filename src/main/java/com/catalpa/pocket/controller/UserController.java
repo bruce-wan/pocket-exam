@@ -43,10 +43,11 @@ public class UserController {
                                        @PathVariable Long userId,
                                        @RequestParam(required = false) Integer catalog,
                                        @RequestParam(required = false) Integer level,
+                                       @RequestParam(defaultValue = "30") Integer days,
                                        @RequestParam(defaultValue = "1") Integer pageNum,
                                        @RequestParam(defaultValue = "10") Integer pageSize) {
 
-        return userService.getUserExams(new Page<>(pageNum, pageSize), platform, userId, catalog, level);
+        return userService.getUserExams(new Page<>(pageNum, pageSize), platform, userId, catalog, level, days);
     }
 
     @PostMapping("/{userId}/exams")
