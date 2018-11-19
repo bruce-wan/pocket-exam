@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.catalpa.pocket.error.ApplicationException;
 import com.catalpa.pocket.error.Error;
 import com.catalpa.pocket.error.ResourceNotFoundException;
+import com.catalpa.pocket.error.SessionKeyException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,28 +30,35 @@ public class BaseControllerAdvice {
     public void processException(Exception ex, HttpServletRequest request, HttpServletResponse response) {
         log.error("Catch Exception", ex);
         Map payload = new HashMap();
-        processError("500", "5001", ex.getClass().getName(), response);
+        processError(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "5001", ex.getClass().getName(), response);
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void processRuntimeException(RuntimeException ex, HttpServletRequest request, HttpServletResponse response) {
         log.error("Catch RuntimeException", ex);
-        processError("500", "5002", ex.getClass().getName(), response);
+        processError(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "5002", ex.getClass().getName(), response);
     }
 
     @ExceptionHandler(ApplicationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public void processApplicationException(ApplicationException ex, HttpServletRequest request, HttpServletResponse response) {
         log.error("Catch ApplicationException", ex);
-        processError("500", "5003", ex.getMessage(), response);
+        processError(HttpStatus.INTERNAL_SERVER_ERROR.toString(), ex.getErrorCode(), ex.getMessage(), response);
+    }
+
+    @ExceptionHandler(SessionKeyException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public void processSessionKeyException(SessionKeyException ex, HttpServletRequest request, HttpServletResponse response) {
+        log.error("Catch SessionKeyException", ex);
+        processError(HttpStatus.BAD_REQUEST.toString(), ex.getErrorCode(), ex.getMessage(), response);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void processApplicationException(ResourceNotFoundException ex, HttpServletRequest request, HttpServletResponse response) {
         log.error("Catch ResourceNotFoundException", ex);
-        processError("400", ex.getErrorCode(), ex.getMessage(), response);
+        processError(HttpStatus.NOT_FOUND.toString(), ex.getErrorCode(), ex.getMessage(), response);
     }
 
     private void processError(String httpCode, String errorCode, String description, HttpServletResponse httpResponse) {

@@ -207,19 +207,20 @@ public class UserServiceImpl implements UserService {
         params.setUserId(userId);
 
         UserSession userSession = userSessionMapper.selectOne(params);
-        if (userSession != null) {
-            redisTemplate.delete(Constants.MINIPROGRAM_SESSIONKEY + userSession.getSkey());
-            userSession.setSkey(skey);
-            userSession.setSessionKey(sessionKeyJson);
-            userSessionMapper.updateById(userSession);
-        } else {
+        if (userSession == null) {
             userSession = new UserSession();
             userSession.setUserId(userId);
             userSession.setSkey(skey);
             userSession.setSessionKey(sessionKeyJson);
             userSessionMapper.insert(userSession);
+            redisTemplate.opsForValue().set(Constants.MINIPROGRAM_SESSIONKEY + skey, sessionKeyJson);
+        } else if (!userSession.getSkey().equals(skey)){
+            redisTemplate.delete(Constants.MINIPROGRAM_SESSIONKEY + userSession.getSkey());
+            userSession.setSkey(skey);
+            userSession.setSessionKey(sessionKeyJson);
+            userSessionMapper.updateById(userSession);
+            redisTemplate.opsForValue().set(Constants.MINIPROGRAM_SESSIONKEY + skey, sessionKeyJson);
         }
-        redisTemplate.opsForValue().set(Constants.MINIPROGRAM_SESSIONKEY + skey, sessionKeyJson);
         return userSession;
     }
 

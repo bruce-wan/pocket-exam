@@ -7,6 +7,7 @@ import com.catalpa.pocket.entity.Platform;
 import com.catalpa.pocket.entity.UserIdentity;
 import com.catalpa.pocket.error.ApplicationException;
 import com.catalpa.pocket.error.ResourceNotFoundException;
+import com.catalpa.pocket.error.SessionKeyException;
 import com.catalpa.pocket.handler.TokenHandler;
 import com.catalpa.pocket.model.*;
 import com.catalpa.pocket.service.SocialService;
@@ -116,7 +117,7 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
         if (sessionKeyJson == null) {
             String message = "can not get available session key";
             log.error(message);
-            throw new ApplicationException("5003", message);
+            throw new SessionKeyException("4003", message);
         }
         String openid = sessionKeyJson.getString("openid");
         String sessionKey = sessionKeyJson.getString("session_key");
@@ -162,7 +163,6 @@ public class SocialServiceWechatImpl implements SocialService, WechatService {
     private UserData saveUserSession(UserData userData, JSONObject sessionKeyJson) {
         String skey = CryptoUtil.getHashSHA1Str(sessionKeyJson.getString("session_key"), "utf8");
         userData.setSkey(skey);
-
         userService.saveOrUpdateUserSession(userData.getId(), skey, sessionKeyJson.toJSONString());
         return userData;
     }
